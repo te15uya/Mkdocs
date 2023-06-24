@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>说明 - Tetsuya's MkDocs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\u8bf4\u660e";
+        var mkdocs_page_input_path = "Linux504\\05\u9879\u76ee\u5b9e\u6218\u4e0e\u603b\u7ed3.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Tetsuya's MkDocs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Linux504</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../01Linux%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B%E5%85%A5%E9%97%A8/">1.Linux系统编程入门</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Tetsuya's MkDocs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+      <li>说明</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">说明</h1>
+<p>本部分笔记及源码出自<code>slide/05项目实战</code></p>
+<h1 id="_2">阻塞/非阻塞 &amp; 同步/异步</h1>
+<ul>
+<li>
+<p>一个典型的网络IO接口调用，分为两个阶段，分别是<code>数据就绪</code> 和 <code>数据读写</code></p>
+</li>
+<li>
+<p><code>数据就绪阶段</code>分为<code>阻塞</code>和<code>非阻塞</code></p>
+</li>
+<li>
+<p>阻塞：阻塞当前线程，直到满足条件</p>
+</li>
+<li>
+<p>非阻塞：直接返回，等满足条件时再通知</p>
+</li>
+<li>
+<p><code>数据读写阶段</code>分为<code>同步</code>和<code>异步</code></p>
+</li>
+<li>
+<p>同步：当A向B请求调用一个网络IO接口时(或者调用某个业务逻辑API接口时)，<strong>数据的读写都是由请求方A自己来完成的(不管是阻塞还是非阻塞)</strong></p>
+</li>
+<li>
+<p>异步：A向B请求调用一个网络IO接口时(或者调用某个业务逻辑API接口时)，<strong>向B传入请求的事件以及事件发生时通知的方式，A就可以处理其它逻辑了</strong>，当B监听到事件处理完成后，会用事先约定好的通知方式，通知A处理结果</p>
+</li>
+<li>
+<p>小结</p>
+</li>
+</ul>
+<blockquote>
+<p>陈硕：在处理 IO 的时候，阻塞和非阻塞都是同步 IO，只有使用了特殊的 API 才是异步 IO</p>
+</blockquote>
+<p><img alt="image-20211209185616260" src="image-20211209185616260.png" /></p>
+<ul>
+<li>图示说明</li>
+</ul>
+<p><img alt="image-20211209185734047" src="image-20211209185734047.png" /></p>
+<ul>
+<li><code>sockfd</code>对应操作系统中的TCP接收缓冲区</li>
+<li>
+<p><code>recv</code>默认阻塞，直到读到数据才往下执行，如果设置为非阻塞，那么就应该通过返回值判断</p>
+<ul>
+<li><code>size == -1</code>：说明读取出错了，但有几种例外需要判断，如产生了<code>EINTR</code>(信号捕捉回收子进程资源时产生<code>SIGCHLD</code>导致这个信号)，<code>EAGAIN/EWOULDBLOCK</code>信号</li>
+<li><code>size == 0</code>：读到文件末尾，即对方连接已关闭</li>
+<li><code>size &gt; 0</code>：读到了大小为<code>size</code>的数据</li>
+</ul>
+</li>
+<li>
+<p>参考</p>
+</li>
+<li>
+<p><a href="https://blog.csdn.net/hnlyyk/article/details/51444617">linux中对errno是EINTR的处理</a></p>
+</li>
+<li><a href="https://www.cnblogs.com/pigerhan/archive/2013/02/27/2935403.html">Linux中的EAGAIN含义</a></li>
+</ul>
+<h1 id="unixlinuxio">Unix/Linux上的I/O模型</h1>
+<h2 id="bio-blocking">阻塞(BIO, blocking)</h2>
+<ul>
+<li>调用者调用了某个函数，<strong>等待这个函数返回，期间什么也不做</strong>，不停的去检查这个函数有没有返回，必须等这个函数返回才能进行下一步动作</li>
+</ul>
+<p><img alt="image-20211209201202971" src="image-20211209201202971.png" /></p>
+<h2 id="nio-non-blocking">非阻塞(NIO, non-blocking)</h2>
+<ul>
+<li>非阻塞等待，<strong>每隔一段时间就去检测IO事件是否就绪，没有就绪就可以做其他事</strong></li>
+<li>非阻塞 I/O 执行系统调用总是立即返回，不管事件是否已经发生</li>
+<li>若事件没有发生，则返回-1，此时可以根据 <code>errno</code> 区分这两种情况，对于<code>accept</code>，<code>recv</code> 和 <code>send</code>，事件未发生时，<code>errno</code> 通常被设置成 <code>EAGAIN</code></li>
+</ul>
+<p><img alt="image-20211209201425774" src="image-20211209201425774.png" /></p>
+<h2 id="io-io-multiplexing">IO 复用(IO multiplexing)</h2>
+<ul>
+<li>Linux 用 <code>select/poll/epoll</code> 函数实现 IO 复用模型，这些函数也会使进程阻塞，但是<strong>和阻塞IO所不同的是这些函数可以同时阻塞多个IO操作</strong></li>
+<li>可以同时对多个读操作、写操作的IO函数进行检测。直到有数据可读或可写时，才真正调用IO操作函数</li>
+</ul>
+<p><img alt="image-20211209201547104" src="image-20211209201547104.png" /></p>
+<h2 id="signal-driven">信号驱动(signal-driven)</h2>
+<ul>
+<li>Linux 用套接口进行信号驱动 IO，安装一个信号处理函数，<strong>进程继续运行并不阻塞，当IO事件就绪，进程收到SIGIO 信号，然后处理 IO 事件</strong></li>
+<li>下图中，内核在第一个阶段是异步，在第二个阶段是同步</li>
+<li>与非阻塞IO的区别在于它提供了消息通知机制，不需要用户进程不断的轮询检查，减少了系统API的调用次数，提高了效率</li>
+</ul>
+<p><img alt="image-20211209201744086" src="image-20211209201744086.png" /></p>
+<h2 id="asynchronous">异步(asynchronous)</h2>
+<ul>
+<li>Linux中，可以调用 <code>aio_read</code> 函数告诉内核<strong>描述字缓冲区指针和缓冲区的大小、文件偏移及通知的方式</strong>，然后立即返回，当内核将数据拷贝到缓冲区后，再通知应用程序</li>
+</ul>
+<pre><code class="language-c">/* Asynchronous I/O control block. */ 
+struct aiocb { 
+    int aio_fildes; /* File desriptor. */ 
+    int aio_lio_opcode; /* Operation to be performed. */ 
+    int aio_reqprio; /* Request priority offset. */ 
+    volatile void *aio_buf; /* Location of buffer. */ 
+    size_t aio_nbytes; /* Length of transfer. */ 
+    struct sigevent aio_sigevent; /* Signal number and value. */ 
+
+    /* Internal members. */ 
+    struct aiocb *__next_prio; 
+    int __abs_prio; 
+    int __policy; 
+    int __error_code; 
+    __ssize_t __return_value; 
+
+#ifndef __USE_FILE_OFFSET64 
+    __off_t aio_offset; /* File offset. */ 
+    char __pad[sizeof (__off64_t) - sizeof (__off_t)]; 
+#else 
+    __off64_t aio_offset; /* File offset. */ 
+#endif 
+    char __glibc_reserved[32]; 
+};
+</code></pre>
+<p><img alt="image-20211209202158250" src="image-20211209202158250.png" /></p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
